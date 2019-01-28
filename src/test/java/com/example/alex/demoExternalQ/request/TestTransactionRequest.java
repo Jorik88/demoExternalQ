@@ -3,6 +3,7 @@ package com.example.alex.demoExternalQ.request;
 import com.example.alex.demoExternalQ.BaseTestConfig;
 import com.example.alex.demoExternalQ.model.request.*;
 import org.junit.Test;
+import java.math.BigDecimal;
 import java.util.Currency;
 
 public class TestTransactionRequest extends BaseTestConfig {
@@ -19,10 +20,10 @@ public class TestTransactionRequest extends BaseTestConfig {
         Source source = new Source(Currency.getInstance("RUB"));
 
         Destination destination = new Destination();
-        destination.setAmount("232.33");
+        destination.setAmount(new BigDecimal("232.33"));
         destination.setCurrency("RUB");
         destination.setAccountNumber("some account");
-        destination.setServiceId("some service id");
+        destination.setServiceId(523523L);
 
         PaymentRequest payment = new PaymentRequest("transaction number", source, destination);
 
@@ -31,9 +32,21 @@ public class TestTransactionRequest extends BaseTestConfig {
         transactionRequest.setAuth(auth);
         transactionRequest.setExtra(extra);
         transactionRequest.setRequestType("pay");
-        transactionRequest.setTerminalId("some terminal id");
+        transactionRequest.setTerminalId(23);
 
         writeToFile(transactionRequest, TransactionRequest.class, filePath);
+    }
+
+
+    @Test
+    public void testTrimAmount() {
+        BigDecimal bigDecimal = new BigDecimal(423.4234).setScale(2, BigDecimal.ROUND_HALF_UP);
+        System.out.println(bigDecimal);
+    }
+
+    @Test
+    public void testGenerateId() {
+        System.out.println(4324224 + "_" + System.currentTimeMillis());
     }
 
 }

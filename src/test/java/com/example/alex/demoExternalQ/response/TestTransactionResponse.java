@@ -27,8 +27,8 @@ public class TestTransactionResponse extends BaseTestConfig {
     public void testWriteToFile() {
         TransactionResponse response = new TransactionResponse();
 
-        Source source = new Source("232.33", Currency.getInstance("RUB").getCurrencyCode());
-        Destination destination = new Destination("some service id", "2323.3", "643", "account number");
+        Source source = new Source(Currency.getInstance("RUB").getCurrencyCode(), new BigDecimal(42.42));
+        Destination destination = new Destination(new BigDecimal(534.53), Currency.getInstance("RUB").getCurrencyCode(), 643L, "account number");
 
         PaymentResponse paymentResponse = new PaymentResponse(
                 "status 60",

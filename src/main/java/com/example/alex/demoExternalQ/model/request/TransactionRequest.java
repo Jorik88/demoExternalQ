@@ -13,16 +13,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "request")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TransactionRequest {
+public class TransactionRequest extends RequestWithExtraPassword {
 
     @XmlElement(name = "request-type")
     private String requestType;
 
     @XmlElement(name = "terminal-id")
-    private String terminalId;
-
-    @XmlElement(name = "extra")
-    private Extra extra;
+    private int terminalId;
 
     @XmlElement(name = "auth")
     private Auth auth;

@@ -26,5 +26,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	compileOnly 'org.springframework.boot:spring-boot-configuration-processor'
 	compileOnly 'org.projectlombok:lombok'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.6'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
