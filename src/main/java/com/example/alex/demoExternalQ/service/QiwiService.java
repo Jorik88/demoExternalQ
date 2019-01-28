@@ -5,6 +5,7 @@ import com.example.alex.demoExternalQ.enums.TransactionStatus;
 import com.example.alex.demoExternalQ.model.base.TotalBalanceResponse;
 import com.example.alex.demoExternalQ.model.base.TransferRequest;
 import com.example.alex.demoExternalQ.model.request.*;
+import com.example.alex.demoExternalQ.model.response.ResponseWithResultCode;
 import com.example.alex.demoExternalQ.model.response.TransactionResponse;
 import com.example.alex.demoExternalQ.utils.JAXBUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -16,12 +17,10 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Currency;
-
 import static com.example.alex.demoExternalQ.enums.QiwiTransferType.CARD_SERVICE_ID;
 
 @Slf4j
@@ -43,33 +42,45 @@ public class QiwiService implements IWalletService {
         return null;
     }
 
+    // TODO: 28.01.19 Нужно проверить account-number,обязательно ли на иметь телефон пользователя.
     @Override
     public String transferExternal(TransferRequest transferRequest) {
-        validateCardData(transferRequest.getTargetWallet());
-        return null;
+        try {
+            validateCardData(transferRequest.getTargetWallet());
+            return transfer(transferRequest);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error was happened");
+        }
     }
 
-    private void transfer(TransferRequest transferRequest) throws IOException, JAXBException {
+    private String transfer(TransferRequest transferRequest) throws IOException, JAXBException {
         TransactionRequest transactionRequest = initTransferRequest(transferRequest.getTransferRequestId(),
                 transferRequest.getCurrency(), transferRequest.getTargetWallet(), transferRequest.getAmount());
 
-        TransactionResponse response = sendRequest(transactionRequest, TransactionResponse.class);
+        String response = sendRequest(transactionRequest);
 
-        checkResponse(transactionRequest, response);
+        if (!response.contains("payment")) {
+            ResponseWithResultCode responseWithResultCode = JAXBUtils
+                    .fromXML(response, ResponseWithResultCode.class);
+            log.warn("Error was happened, response={}", responseWithResultCode);
+            throw new IllegalArgumentException("Some error happened " + responseWithResultCode);
+        }
 
+        TransactionResponse transactionResponse = JAXBUtils.fromXML(response, TransactionResponse.class);
+
+        checkResponse(transactionRequest, transactionResponse);
+
+        return String.valueOf(transactionResponse.getPaymentResponse().getTransactionNumber());
     }
 
     private void checkResponse(TransactionRequest transactionRequest, TransactionResponse response) {
-        if (response == null || response.getPaymentResponse().getTxnId() == null) {
+        if (response == null || response.getPaymentResponse().getTxnId() == null
+                || !transactionRequest.getAuth().getPayment().getTransactionNumber().equals(String.valueOf(response.getPaymentResponse().getTransactionNumber()))) {
             throw new IllegalArgumentException("Wrong transaction id");
         }
-        if (!transactionRequest.getAuth().getPayment().getTransactionNumber().equals(response.getPaymentResponse().getTransactionNumber())) {
-            throw new IllegalArgumentException("Wrong transaction id");
-        }
-
     }
 
-    public TransactionRequest initTransferRequest(String transferId, String currency, String targetWalet, BigDecimal amount) {
+    private TransactionRequest initTransferRequest(String transferId, String currency, String targetWalet, BigDecimal amount) {
         TransactionRequest transactionRequest = new TransactionRequest();
 
         Extra extra = new Extra();
@@ -108,14 +119,14 @@ public class QiwiService implements IWalletService {
         return null;
     }
 
-    private <T> T sendRequest(RequestWithExtraPassword request, Class<T> clazz) throws IOException, JAXBException {
+    private String sendRequest(RequestWithExtraPassword request) throws IOException, JAXBException {
 
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
             HttpPost httpPost = new HttpPost(TRANSFER_URL);
             httpPost.setEntity(new StringEntity(JAXBUtils.toXML(request)));
 
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
-                return JAXBUtils.fromXML(EntityUtils.toString(httpResponse.getEntity()), clazz);
+                return EntityUtils.toString(httpResponse.getEntity());
             }
         }
     }
