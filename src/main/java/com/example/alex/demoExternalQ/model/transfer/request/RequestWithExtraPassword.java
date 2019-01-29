@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.request;
+package com.example.alex.demoExternalQ.model.transfer.request;
 
 import lombok.Setter;
 import javax.xml.bind.annotation.XmlElement;

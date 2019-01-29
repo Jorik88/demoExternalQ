@@ -1,14 +1,14 @@
 package com.example.alex.demoExternalQ.request;
 
 import com.example.alex.demoExternalQ.BaseTestConfig;
-import com.example.alex.demoExternalQ.model.request.*;
+import com.example.alex.demoExternalQ.model.transfer.request.*;
 import org.junit.Test;
 import java.math.BigDecimal;
 import java.util.Currency;
 
 public class TestTransactionRequest extends BaseTestConfig {
 
-    private String filePath = "file1.xml";
+    private String filePath = "trRequest.xml";
 
     @Test
     public void testCreateRequest() {
@@ -32,7 +32,7 @@ public class TestTransactionRequest extends BaseTestConfig {
         transactionRequest.setAuth(auth);
         transactionRequest.setExtra(extra);
         transactionRequest.setRequestType("pay");
-        transactionRequest.setTerminalId(23);
+        transactionRequest.setTerminalId(23L);
 
         writeToFile(transactionRequest, TransactionRequest.class, filePath);
     }

@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.request;
+package com.example.alex.demoExternalQ.model.status.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,14 +13,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NoArgsConstructor
 @XmlRootElement(name = "payment")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaymentRequest {
+public class DestinationForStatus {
 
-    @XmlElement(name = "tarnsaction-number")
-    private String transactionNumber;
+    @XmlElement(name = "account-number")
+    private Long accountNumber;
 
-    @XmlElement(name = "from")
-    private Source source;
-
-    @XmlElement(name = "to")
-    private Destination destination;
 }

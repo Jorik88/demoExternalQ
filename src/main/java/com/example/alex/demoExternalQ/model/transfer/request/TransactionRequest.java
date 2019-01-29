@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.request;
+package com.example.alex.demoExternalQ.model.transfer.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class TransactionRequest extends RequestWithExtraPassword {
     private String requestType;
 
     @XmlElement(name = "terminal-id")
-    private int terminalId;
+    private Long terminalId;
 
     @XmlElement(name = "auth")
     private Auth auth;

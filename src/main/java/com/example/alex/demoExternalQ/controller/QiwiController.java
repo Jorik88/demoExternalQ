@@ -2,7 +2,7 @@ package com.example.alex.demoExternalQ.controller;
 
 import com.example.alex.demoExternalQ.configuration.QiwiConfiguration;
 import com.example.alex.demoExternalQ.model.base.TransferRequest;
-import com.example.alex.demoExternalQ.model.request.*;
+import com.example.alex.demoExternalQ.model.transfer.request.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

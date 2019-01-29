@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.response;
+package com.example.alex.demoExternalQ.model.transfer.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "qiwi")
 public class QiwiConfiguration {
 
-    private int terminalId;
+    private Long terminalId;
     private String password;
+    private Long accountNumber;
 }

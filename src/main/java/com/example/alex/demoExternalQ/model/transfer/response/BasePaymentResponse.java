@@ -1,12 +1,11 @@
-package com.example.alex.demoExternalQ.model.response;
+package com.example.alex.demoExternalQ.model.transfer.response;
 
-import com.example.alex.demoExternalQ.model.request.Destination;
-import com.example.alex.demoExternalQ.model.request.Source;
 import com.example.alex.demoExternalQ.utils.DateAdapter;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import javax.xml.bind.annotation.*;
+import lombok.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Date;
 
@@ -15,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @XmlRootElement(name = "payment")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class PaymentResponse {
+public class BasePaymentResponse {
 
     @XmlAttribute(name = "status")
     private String status;
@@ -38,11 +37,5 @@ public class PaymentResponse {
     @XmlJavaTypeAdapter(DateAdapter.class)
     @XmlAttribute(name = "txn-date")
     private Date transactionDate;
-
-    @XmlElement(name = "from")
-    private Source source;
-
-    @XmlElement(name = "to")
-    private Destination destination;
 
 }

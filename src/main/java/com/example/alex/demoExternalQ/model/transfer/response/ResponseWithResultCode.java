@@ -1,8 +1,6 @@
-package com.example.alex.demoExternalQ.model.request;
+package com.example.alex.demoExternalQ.model.transfer.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -11,10 +9,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "auth")
+@XmlRootElement(name = "response")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Auth {
+public class ResponseWithResultCode {
 
-    @XmlElement(name = "payment")
-    private PaymentRequest payment;
+    @XmlElement(name = "result-code")
+    private ResultCode resultCode;
+
 }

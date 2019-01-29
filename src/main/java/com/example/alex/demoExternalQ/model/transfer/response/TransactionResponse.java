@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.response;
+package com.example.alex.demoExternalQ.model.transfer.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,9 +13,8 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TransactionResponse {
 
-
     @XmlElement(name = "payment")
-    private PaymentResponse paymentResponse;
+    private TransactionPaymentResponse paymentResponse;
 
     @XmlElementWrapper(name = "balances")
     @XmlElement(name = "balance")

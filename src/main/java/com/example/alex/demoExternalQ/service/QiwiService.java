@@ -4,9 +4,13 @@ import com.example.alex.demoExternalQ.configuration.QiwiConfiguration;
 import com.example.alex.demoExternalQ.enums.TransactionStatus;
 import com.example.alex.demoExternalQ.model.base.TotalBalanceResponse;
 import com.example.alex.demoExternalQ.model.base.TransferRequest;
-import com.example.alex.demoExternalQ.model.request.*;
-import com.example.alex.demoExternalQ.model.response.ResponseWithResultCode;
-import com.example.alex.demoExternalQ.model.response.TransactionResponse;
+import com.example.alex.demoExternalQ.model.status.request.GetStatusOfPaymentRequest;
+import com.example.alex.demoExternalQ.model.status.request.DestinationForStatus;
+import com.example.alex.demoExternalQ.model.status.request.PaymentForStatus;
+import com.example.alex.demoExternalQ.model.status.response.GetStatusOfPaymentResponse;
+import com.example.alex.demoExternalQ.model.transfer.request.*;
+import com.example.alex.demoExternalQ.model.transfer.response.ResponseWithResultCode;
+import com.example.alex.demoExternalQ.model.transfer.response.TransactionResponse;
 import com.example.alex.demoExternalQ.utils.JAXBUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Currency;
 import static com.example.alex.demoExternalQ.enums.QiwiTransferType.CARD_SERVICE_ID;
 
@@ -28,7 +33,7 @@ import static com.example.alex.demoExternalQ.enums.QiwiTransferType.CARD_SERVICE
 public class QiwiService implements IWalletService {
 
     private static final String TRANSFER_URL = "https://api.qiwi.com/xml/topup.jsp";
-    private static final String TRANSFER_OPERATION = "pay";
+    private static final String REQUEST_TYPE = "pay";
 
     private QiwiConfiguration configuration;
 
@@ -42,7 +47,7 @@ public class QiwiService implements IWalletService {
         return null;
     }
 
-    // TODO: 28.01.19 Нужно проверить account-number,обязательно ли на иметь телефон пользователя.
+    // TODO: 28.01.19 Нужно проверить account-number,обязательно ли нам иметь телефон пользователя.
     @Override
     public String transferExternal(TransferRequest transferRequest) {
         try {
@@ -100,7 +105,7 @@ public class QiwiService implements IWalletService {
 
         transactionRequest.setAuth(auth);
         transactionRequest.setExtra(extra);
-        transactionRequest.setRequestType(TRANSFER_OPERATION);
+        transactionRequest.setRequestType(REQUEST_TYPE);
         transactionRequest.setTerminalId(configuration.getTerminalId());
         return transactionRequest;
     }
@@ -111,7 +116,38 @@ public class QiwiService implements IWalletService {
 
     @Override
     public TransactionStatus getTransactionStatus(String transactionId) {
-        return null;
+        try {
+            GetStatusOfPaymentRequest statusRequest = initStatusRequest(transactionId);
+            String response = sendRequest(statusRequest);
+            GetStatusOfPaymentResponse paymentResponse = JAXBUtils.fromXML(response, GetStatusOfPaymentResponse.class);
+
+            if (paymentResponse.getPayment() != null && paymentResponse.getPayment().getStatus().equals("60") && paymentResponse.getPayment().isFinalStatus()) {
+                return TransactionStatus.PROCESSED;
+            } else if (paymentResponse.getPayment() == null ||
+                    Integer.valueOf(paymentResponse.getPayment().getStatus()) >= 50 && Integer.valueOf(paymentResponse.getPayment().getStatus()) <= 59) {
+                return TransactionStatus.WAITING;
+            } else {
+                return TransactionStatus.FAILED;
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Some exception was happened");
+        }
+    }
+
+    private GetStatusOfPaymentRequest initStatusRequest(String transactionId) {
+        GetStatusOfPaymentRequest statusRequest = new GetStatusOfPaymentRequest();
+
+        Extra extra = new Extra();
+        extra.setValue(configuration.getPassword());
+
+        DestinationForStatus destination = new DestinationForStatus(configuration.getAccountNumber());
+        PaymentForStatus payment = new PaymentForStatus(Long.valueOf(transactionId), destination);
+
+        statusRequest.setExtra(extra);
+        statusRequest.setTerminalId(configuration.getTerminalId());
+        statusRequest.setRequestType(REQUEST_TYPE);
+        statusRequest.setPayment(Collections.singletonList(payment));
+        return statusRequest;
     }
 
     @Override

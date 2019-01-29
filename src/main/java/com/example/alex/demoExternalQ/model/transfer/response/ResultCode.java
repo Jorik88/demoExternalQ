@@ -1,4 +1,4 @@
-package com.example.alex.demoExternalQ.model.request;
+package com.example.alex.demoExternalQ.model.transfer.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,13 +8,13 @@ import javax.xml.bind.annotation.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@XmlRootElement(name = "extra")
+@XmlRootElement(name = "result-code")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Extra {
+public class ResultCode {
 
-    @XmlAttribute(name = "name")
-    private String name = "password";
+    @XmlAttribute(name = "fatal")
+    private boolean fatal;
 
     @XmlValue
-    private String value;
+    private int codeValue;
 }
