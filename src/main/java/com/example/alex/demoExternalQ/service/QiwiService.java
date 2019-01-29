@@ -2,10 +2,13 @@ package com.example.alex.demoExternalQ.service;
 
 import com.example.alex.demoExternalQ.configuration.QiwiConfiguration;
 import com.example.alex.demoExternalQ.enums.TransactionStatus;
+import com.example.alex.demoExternalQ.model.balance.GetBalanceRequest;
+import com.example.alex.demoExternalQ.model.balance.GetBalanceResponse;
+import com.example.alex.demoExternalQ.model.base.BalanceItem;
 import com.example.alex.demoExternalQ.model.base.TotalBalanceResponse;
 import com.example.alex.demoExternalQ.model.base.TransferRequest;
-import com.example.alex.demoExternalQ.model.status.request.GetStatusOfPaymentRequest;
 import com.example.alex.demoExternalQ.model.status.request.DestinationForStatus;
+import com.example.alex.demoExternalQ.model.status.request.GetStatusOfPaymentRequest;
 import com.example.alex.demoExternalQ.model.status.request.PaymentForStatus;
 import com.example.alex.demoExternalQ.model.status.response.GetStatusOfPaymentResponse;
 import com.example.alex.demoExternalQ.model.transfer.request.*;
@@ -26,6 +29,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.List;
+import java.util.stream.Collectors;
 import static com.example.alex.demoExternalQ.enums.QiwiTransferType.CARD_SERVICE_ID;
 
 @Slf4j
@@ -34,6 +39,7 @@ public class QiwiService implements IWalletService {
 
     private static final String TRANSFER_URL = "https://api.qiwi.com/xml/topup.jsp";
     private static final String REQUEST_TYPE = "pay";
+    private static final String REQUEST_BALANCE_TYPE = "ping";
 
     private QiwiConfiguration configuration;
 
@@ -44,7 +50,28 @@ public class QiwiService implements IWalletService {
 
     @Override
     public TotalBalanceResponse getTotalBalance() {
-        return null;
+        GetBalanceRequest getBalanceRequest = new GetBalanceRequest();
+        Extra extra = new Extra();
+        extra.setValue(configuration.getPassword());
+        getBalanceRequest.setRequestType(REQUEST_BALANCE_TYPE);
+        getBalanceRequest.setTerminalId(configuration.getTerminalId());
+        getBalanceRequest.setExtra(extra);
+        try {
+            String result = sendRequest(getBalanceRequest);
+
+            GetBalanceResponse balanceResponse = JAXBUtils.fromXML(result, GetBalanceResponse.class);
+            if (balanceResponse == null || balanceResponse.getResultCode().isFatal()) {
+                throw new IllegalStateException("Some exception happened");
+            } else {
+                List<BalanceItem> balanceItemList = balanceResponse.getBalance().stream()
+                        .map(balance -> new BalanceItem(balance.getCode(), balance.getValue())).collect(Collectors.toList());
+
+                return new TotalBalanceResponse(balanceItemList);
+            }
+        } catch (Exception e) {
+            log.warn("Error was happened");
+            throw new IllegalArgumentException("Error was happened");
+        }
     }
 
     // TODO: 28.01.19 Нужно проверить account-number,обязательно ли нам иметь телефон пользователя.
